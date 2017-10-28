@@ -5,12 +5,16 @@ import java.util.Collections;
 import java.util.Properties;
 
 /**
- * Created by manoj.kumar1 on 10/24/2017.
+ * Consumer class
+ *
+ * Author : Manoj Kumar
+ * Contact : manoj.kumar.mbm@gmail.com
  */
-public class KafkaConsumer {
-    Properties configuration;
-    String topic;
-    Consumer consumer;
+
+class KafkaConsumer {
+    private Properties configuration;
+    private String topic;
+    private Consumer consumer;
 
     KafkaConsumer(String topic,Properties conf) throws InterruptedException {
         configuration = conf;
@@ -23,29 +27,21 @@ public class KafkaConsumer {
         consumer.subscribe(Collections.singletonList("a"));
     }
 
-    public void readMsg()throws InterruptedException {
-
-        final int giveUp = 10000;
-        int noRecordsCount = 0;
+    void readMsg() throws InterruptedException {
 
         while (true) {
             final ConsumerRecords<Long, String> consumerRecords =
                     consumer.poll(1000);
-            if (consumerRecords.count()==0) {
-                noRecordsCount++;
-                if (noRecordsCount > giveUp) break;
-                else continue;
-            }
 
-            consumerRecords.forEach(record -> {
+            if (consumerRecords.count() == 0) continue;
+
+            consumerRecords.forEach(record ->
                 System.out.printf("Consumer Record:(%d, %s, %d, %d)\n",
                         record.key(), record.value(),
-                        record.partition(), record.offset());
-            });
+                        record.partition(), record.offset())
+            );
 
             consumer.commitAsync();
         }
-        consumer.close();
-        System.out.println("DONE");
     }
 }
